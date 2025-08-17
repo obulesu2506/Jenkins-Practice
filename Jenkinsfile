@@ -1,9 +1,13 @@
-//Use-Case: Disable Parallel executions
+//Use-Case: Manual Approval required before going to Prod Deployment for cross verification by Manager. Also 'When' condition
 pipeline {
     agent any
     options {
         timeout(time: 10, unit: 'SECONDS')
         disableConcurrentBuilds()
+    }
+    //below logic used for debug
+    environment {
+        DEBUG = 'true'
     }
     stages {
         stage('Build') {
@@ -17,23 +21,39 @@ pipeline {
             }
         }
         stage('Deploy') {
+            when {
+                expression { env.GIT_BRANCH != "origin/main"}
+            }
             steps {
                 sh 'echo This is Deploy'
-                error ' deployment failed'
             }
+        }
+        stage('Approval') {
+            input {
+                message " Should we Continue?"
+                OK "yes, we should"
+                submitter "kumar, bob"
+                parameters {
+                    string(name: 'PERSON', defaultValue: 'Mr.Jenkins', description: 'who should i say hello to?')
+                }
+            }
+            steps {
+                echo "Hello ${PERSON}, nice to meet you."
+            }
+
         }
     }
     post {
-        always{
-            echo 'This section runs always'
+        always {
+            echo "This Section runs always"
             deleteDir()
         }
-        success{
-            echo 'This section runs when pipeline success'
+        success {
+            echo " This section runs when pipeline success"
             deleteDir()
         }
-        failure{
-            echo 'This section runs when pipeline failure'
+        failure {
+            echo " This section runs when pipeline failure"
             deleteDir()
         }
     }
