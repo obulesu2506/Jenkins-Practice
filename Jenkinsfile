@@ -1,60 +1,44 @@
-//Use-Case: Manual Approval required before going to Prod Deployment for cross verification by Manager. Also 'When' condition
+//Use-Case: Parameters can be used to pass during pipeline runtime using params() function for calling those parameter values
 pipeline {
-    agent any
+    agent {
+        label 'AGENT-1'
+    }
     options {
-        timeout(time: 10, unit: 'MINUTES')
-        //disableConcurrentBuilds()
+        timeout(time: 20, unit: 'MINUTES')
+        disableConcurrentBuilds()
+        retry(16)
     }
-    //below logic used for debug
-    environment {
-        DEBUG = 'true'
+    parameters {
+        string(name: 'PERSON', defaultValue: 'Mr. Jenkins', description: ' Who should say Hello' )
+        text(name: 'BIOGRAPHY', defaultValue: ' ', description: 'Enter some Info ')
+        booleanParam(name: 'TOGGLE', defaultValue: true, description: 'Toggle this value')
+        choice(name: 'ACTION', defaultValue: ['one', 'two','three'], description: 'Pick Something')
+        password(name: 'PASSWORD', defaultValue: 'SECRET', description: 'Eneter as password')
     }
-    stages {
-        stage('Build') {
+    stages{
+        stage('Build section') {
             steps {
-                sh 'echo This is Build'
+                sh 'echo this is Build section'
             }
         }
-        stage('Test') {
+        stage('Test Section') {
             steps {
-                sh 'echo This is Test'
+                sh 'echo This is Test section'
             }
         }
-        stage('Deploy') {
-            when {
-                expression { env.GIT_BRANCH = "origin/main"}
-            }
+        stage('Deploy'){
             steps {
-                sh 'echo This is Deploy'
+                sh 'echo This is Deploy section'
             }
         }
-        stage('Approval') {
-            input {
-                message " Should we Continue?"
-                ok "yes, we should"
-                submitter "kumar, bob"
-                parameters {
-                    string(name: 'PERSON', defaultValue: 'Mr.Jenkins', description: 'who should i say hello to?')
-                }
-            }
+        stage('Parameters section') {
             steps {
-                echo "Hello ${PERSON}, nice to meet you."
+                echo "Hello: ${params.PERSON}"
+                echo "Biography: ${params.BIOGRAPHY}"
+                echo "Toggle: ${params.TOGGLE}"
+                echo "Choice: ${ACTION}"
+                echo "Password: ${params.PASSWORD}"
             }
-
-        }
-    }
-    post {
-        always {
-            echo "This Section runs always"
-            deleteDir()
-        }
-        success {
-            echo " This section runs when pipeline success"
-            deleteDir()
-        }
-        failure {
-            echo " This section runs when pipeline failure"
-            deleteDir()
         }
     }
 }
