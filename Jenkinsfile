@@ -31,7 +31,7 @@ pipeline {
         stage('Approval') {
             input {
                 message " Should we Continue?"
-                OK "yes, we should"
+                ok "yes, we should"
                 submitter "kumar, bob"
                 parameters {
                     string(name: 'PERSON', defaultValue: 'Mr.Jenkins', description: 'who should i say hello to?')
