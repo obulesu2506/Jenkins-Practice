@@ -3,7 +3,7 @@ pipeline {
     agent any
     options {
         timeout(time: 10, unit: 'MINUTES')
-        disableConcurrentBuilds()
+        //disableConcurrentBuilds()
     }
     //below logic used for debug
     environment {
@@ -22,7 +22,7 @@ pipeline {
         }
         stage('Deploy') {
             when {
-                expression { env.GIT_BRANCH != "origin/main"}
+                expression { env.GIT_BRANCH = "origin/main"}
             }
             steps {
                 sh 'echo This is Deploy'
