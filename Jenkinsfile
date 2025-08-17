@@ -1,8 +1,6 @@
 //Use-Case: Parameters can be used to pass during pipeline runtime using params() function for calling those parameter values
 pipeline {
-    agent {
-        label 'AGENT-1'
-    }
+    agent any
     options {
         timeout(time: 20, unit: 'MINUTES')
         disableConcurrentBuilds()
