@@ -1,0 +1,67 @@
+//Use Case: Features of "When" condition and how control the actions
+pipeline {
+    agent {
+        label 'AGENT-1'
+    }
+    options {
+        timeout(time: 30, unit: 'MINUTES') //Used for the Job runtime cut-off
+        disableConcurrentBuilds() // used for to avoid same pipelines running in multiple sessions
+    }
+    //used for bebugging
+    environment {
+        DEBUG = true
+    }
+    parameters { //used for parameterized pipelines
+        choice(name: 'ACTION', choices:['apply', 'destroy'], description: 'pick something' )
+        string(name: 'PERSON', defaultValue: 'Mr. Jenkins', description: 'who should i say hello to?')
+    }
+    stages {
+        stage('Build') {
+            steps {
+                sh 'echo This is Build stage'
+            }
+        }
+        stage('Test') {
+            steps {
+                sh 'echo This is test stage'
+            }
+        }
+        stage('Deploy') {
+            when { //used for conditional based logic to be executed
+                expression{ env.GIT_BRANCH == 'origin/main'}
+            }
+            steps {
+                sh 'echo This is Deploy stage'
+            }
+        }
+        stage('Parameters'){
+            steps {
+                echo "Hello: ${params.ACTION}"
+            }
+        }
+        stage('Approval'){
+            input {
+                message "Should we continue"
+                ok "yes, we should"
+                submitter "alice, bob"
+            }
+            steps {
+                echo "Hello, ${params.PERSON}, nice to meet you"
+            }
+        }
+    }
+    post {
+        always {
+            echo 'This is always section and trigger always'
+            deleteDir()
+        }
+        success {
+            echo 'This is success section which triggers if the pipeline get success'
+            deleteDir()
+        }
+        failure {
+            echo 'This is failure section which triggers if the pipeline get failure'
+            deleteDir()
+        }
+    }
+}
